@@ -153,16 +153,18 @@ function animateNumber(element, targetNumber) {
 }
 
 function formatDate(dateString) {
-    const date = new Date(dateString);
-    const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
-    return date.toLocaleDateString('pt-BR', options);
+    // Exibe a data no formato dd/mm/yyyy sem criar um objeto Date
+    if (!dateString) return '';
+    const [year, month, day] = dateString.split('-');
+    return `${day}/${month}/${year}`;
 }
 
 function isOverdue(dateString, completed) {
     if (completed) return false;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const taskDate = new Date(dateString);
+    const [year, month, day] = dateString.split('-');
+    const taskDate = new Date(Number(year), Number(month) - 1, Number(day));
     taskDate.setHours(0, 0, 0, 0);
     return taskDate < today;
 }
@@ -175,7 +177,7 @@ function renderTasks() {
     } else if (filter === 'done') {
         filtered = tasks.filter(t => t.completed);
     }
-    filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
+    filtered.sort((a, b) => a.date.localeCompare(b.date));
     if (filtered.length === 0) {
         const emptyStateText =
             filter === 'all' ? 'Nenhuma tarefa encontrada' :
@@ -234,7 +236,7 @@ function addTask(e) {
     const newTask = {
         id: nextId++,
         text,
-        date,
+        date: dateInput.value,
         completed: false
     };
     tasks.push(newTask);
